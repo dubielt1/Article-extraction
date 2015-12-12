@@ -38,9 +38,13 @@ int main(int argc, char* argv[])
         //                x        y
         //one columns is 850px x 5400px
         Rect r = boundingRect(c);
-        if (r.height > 5500 || r.width > 875)
+        float percentage_height = (float)r.height / (float)image.rows;
+        float percentage_width = (float)r.width / (float)image.cols;
+        
+        //Should be robust to different dimensions of test image / test set
+        if ( percentage_height > 0.92 || percentage_width > 0.20)
             continue;
-        if (r.height < 300 || r.width < 500)
+        if (percentage_height < 0.10 || percentage_width < 0.08)
             continue;
 
         big_rect = big_rect | r; // finds bounding box of all Rects
