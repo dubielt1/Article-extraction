@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 {
     const char* lang = "eng";
 
-    Mat image = imread(path_to_image);
+    Mat image = imread( argv[1] );
     Mat gray;
     cvtColor(image, gray, COLOR_BGR2GRAY);
     Mat fin;
