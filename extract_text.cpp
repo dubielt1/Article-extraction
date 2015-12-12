@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     Mat gray;
     cvtColor(image, gray, COLOR_BGR2GRAY);
     Mat fin;
-    double thresh = threshold(gray, fin, 160, 255, THRESH_BINARY_INV);
+    threshold(gray, fin, 160, 255, THRESH_BINARY_INV);
     Mat kernel =  getStructuringElement(MORPH_CROSS, Size(2, 4));
     Mat dilated;
     dilate(fin, dilated, kernel, Point(-1,-1), 6);
@@ -54,14 +54,32 @@ int main(int argc, char* argv[])
         rects[i].height = big_rect.height;
     }
     
-    groupRectangles(rects, 1, 0.1);
-    //groups redundant Rects
-
-    for (size_t i = 0; i < rects.size(); i++)
+    sort(rects.begin(), rects.end(), [] (Rect a, Rect b) { return a.x < b.x; });
+    for ( size_t i = 1; i < rects.size(); i++ )
     {
-	    rects[i].x -= 5; //Make sure all text is within Rect
-	    rects[i].width += 5; //
-	    rectangle(image, rects[i], Scalar(255, 0, 255), 2); //draw Rects on image
+        //removes redundant boundingRects
+        //minimum area Rect that contains both [i-1] and [i]
+        Rect big_rect = rects[i-1] | rects[i];
+
+        //If [i-1] and [i] bound same column
+        if( big_rect.width < rects[i-1].width + rects[i].width )
+        {
+            //has 0 width
+            rects[i-1] = Rect();
+            rects[i] = big_rect;
+        }
+    }
+
+    vector<Rect> rect;
+    for ( size_t i = 1; i < rects.size(); i++ )
+    {
+        //filters for 0 width
+        if( rects[i].width > 0 )
+        {
+            //draw Rects
+            rectangle(image, rects[i], Scalar(255,0,255), 2);
+            rect.push_back( rects[i] );
+        }
     }
     
     //imwrite("result.png", image); uncomment to see image with Rects drawn around columns
@@ -69,31 +87,31 @@ int main(int argc, char* argv[])
     sort(rects.begin(), rects.end(), [] (Rect a, Rect b) { return a.x < b.x; }); //sort by x
     
     //Optimize images (seven columns) before passing to Tesseract
-    Mat col0 = image(rects[0]);
+    Mat col0 = image(rect[0]);
     cvtColor(col0, col0, COLOR_BGR2GRAY);
     threshold(col0, col0, 152, 255, THRESH_BINARY);
 
-    Mat col1 = image(rects[1]);
+    Mat col1 = image(rect[1]);
     cvtColor(col1, col1, COLOR_BGR2GRAY);
     threshold(col1, col1, 152, 255, THRESH_BINARY);
 
-    Mat col2 = image(rects[2]);
+    Mat col2 = image(rect[2]);
     cvtColor(col2, col2, COLOR_BGR2GRAY);
     threshold(col2, col2, 152, 255, THRESH_BINARY);
 
-    Mat col3 = image(rects[3]);
+    Mat col3 = image(rect[3]);
     cvtColor(col3, col3, COLOR_BGR2GRAY);
     threshold(col3, col3, 152, 255, THRESH_BINARY);
 
-    Mat col4 = image(rects[4]);
+    Mat col4 = image(rect[4]);
     cvtColor(col4, col4, COLOR_BGR2GRAY);
     threshold(col4, col4, 152, 255, THRESH_BINARY);
 
-    Mat col5 = image(rects[5]);
+    Mat col5 = image(rect[5]);
     cvtColor(col5, col5, COLOR_BGR2GRAY);
     threshold(col5, col5, 152, 255, THRESH_BINARY);
 
-    Mat col6 = image(rects[6]);
+    Mat col6 = image(rect[6]);
     cvtColor(col6, col6, COLOR_BGR2GRAY);
     threshold(col6, col6, 152, 255, THRESH_BINARY);
 
