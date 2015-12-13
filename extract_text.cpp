@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
         //Should be robust to different dimensions of test image / test set
         if ( percentage_height > 0.92 || percentage_width > 0.20)
             continue;
-        if (percentage_height < 0.10 || percentage_width < 0.08)
+        if (percentage_height < 0.05 || percentage_width < 0.04)
             continue;
 
         big_rect = big_rect | r; // finds bounding box of all Rects
